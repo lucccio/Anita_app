@@ -5,9 +5,8 @@ from app.database.categorias_db import (
     buscar_categoria_por_nombre
 )
 
-
 def registrar_categoria(nombre, descripcion):
-    nombre = nombre.strip()
+    nombre = nombre.strip().lower()   
     descripcion = descripcion.strip()
 
     if not nombre:
@@ -24,16 +23,14 @@ def registrar_categoria(nombre, descripcion):
 
     return insertar_categoria(categoria)
 
-
 def obtener_categorias():
     return listar_categorias()
-
 
 def editar_categoria(categoria_id, nombre, descripcion):
     if not categoria_id:
         raise ValueError("Categoría inválida")
 
-    nombre = nombre.strip()
+    nombre = nombre.strip().lower()   
     descripcion = descripcion.strip()
 
     if not nombre:
