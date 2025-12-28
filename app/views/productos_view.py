@@ -9,7 +9,6 @@ def vista_productos():
     nombre = st.text_input("Nombre del producto")
     descripcion = st.text_area("Descripción")
     precio = st.number_input("Precio", min_value=0.0, step=0.1)
-    stock = st.number_input("Stock", min_value=0, step=1)
     from app.logic.categorias_logic import obtener_categorias
 
     # Obtener categorías
@@ -33,7 +32,7 @@ def vista_productos():
 
     if st.button("Registrar producto"):
         try:
-            registrar_producto(nombre, descripcion, precio, stock, categoria_id)
+            registrar_producto(nombre, descripcion, precio, categoria_id)
             st.success("Producto registrado correctamente")
             st.rerun()
         except Exception as e:
@@ -56,9 +55,7 @@ def vista_productos():
             "Nombre": p["nombre"],
             "Descripción": p["descripcion"],
             "Precio": p["precio"],
-            "Stock": p["stock"],
             "Categoría": p["categoria_id"],
-            "Estado": "Activo" if p["estado"] else "Inactivo"
         })
 
     st.dataframe(tabla, use_container_width=True)
