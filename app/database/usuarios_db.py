@@ -27,3 +27,4 @@ def actualizar_usuario(usuario_id: int, datos: dict):
 
 def listar_usuarios():
     return supabase.table("usuarios").select("*").execute()
+
