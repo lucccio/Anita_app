@@ -25,9 +25,9 @@ def vista_usuarios():
         value=st.session_state.get("apellido", "")
     )
     dni = st.text_input(
-    "DNI",
-    value=st.session_state.get("dni", ""),
-    max_chars=8
+        "DNI",
+        value=st.session_state.get("dni", ""),
+        max_chars=8
     )
     telefono = st.text_input(
         "Teléfono",
@@ -43,6 +43,7 @@ def vista_usuarios():
         type="password"
     )
 
+    # ================= ACCIONES =================
     if not st.session_state.modo_edicion:
         if st.button("Registrar"):
             try:
@@ -55,6 +56,7 @@ def vista_usuarios():
                 st.warning(f"⚠️ {e}")
             except Exception:
                 st.error("❌ Ocurrió un error inesperado")
+
     else:
         if st.button("Guardar"):
             try:
@@ -63,15 +65,16 @@ def vista_usuarios():
                     nombre, apellido, dni, telefono, email
                 )
                 st.success("✏️ Usuario actualizado correctamente")
-                st.session_state.modo_edicion = False
-                st.session_state.usuario_seleccionado = None
+
+                # limpiar estados
                 st.session_state.modo_edicion = False
                 st.session_state.usuario_seleccionado = None
 
-                for k in ["nombre", "apellido", "dni", "telefono", "email"]:
+                for k in ["nombre", "apellido", "dni", "telefono", "email", "password"]:
                     st.session_state.pop(k, None)
 
                 st.rerun()
+
             except ValueError as e:
                 st.warning(f"⚠️ {e}")
             except Exception:
@@ -107,22 +110,17 @@ def vista_usuarios():
     )
 
     seleccionados = [row for row in edited if row[""]]
-    # Si no hay selección, cancelar edición
+
+    # Cancelar edición si se desmarca
     if not seleccionados and st.session_state.modo_edicion:
         st.session_state.modo_edicion = False
         st.session_state.usuario_seleccionado = None
-        st.session_state.pop("nombre", None)
-        st.session_state.pop("apellido", None)
-        st.session_state.pop("dni", None)
-        st.session_state.pop("telefono", None)
-        st.session_state.pop("email", None)
+        for k in ["nombre", "apellido", "dni", "telefono", "email"]:
+            st.session_state.pop(k, None)
 
     col1, col2 = st.columns([8, 2])
     with col2:
-        if st.button(
-            "✏️ Editar",
-            disabled=not seleccionados
-        ):
+        if st.button("✏️ Editar", disabled=not seleccionados):
             u = seleccionados[0]
             st.session_state.modo_edicion = True
             st.session_state.usuario_seleccionado = u
@@ -134,4 +132,3 @@ def vista_usuarios():
             st.session_state.email = u["Email"]
 
             st.rerun()
-
