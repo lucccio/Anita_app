@@ -15,9 +15,10 @@ def vista_categorias():
 
     # ===== FORMULARIO =====
     nombre = st.text_input(
-        "Nombre de la categoría",
-        value=st.session_state.get("cat_nombre", "")
+    "Nombre de la categoría",
+        value=st.session_state.get("cat_nombre", "").lower()
     )
+
     descripcion = st.text_area(
         "Descripción",
         value=st.session_state.get("cat_desc", "")
@@ -42,8 +43,10 @@ def vista_categorias():
                 st.success("✏️ Categoría actualizada")
                 st.session_state.modo_edicion_cat = False
                 st.session_state.categoria_sel = None
-                st.session_state.clear()
+                for k in ["cat_nombre", "cat_desc", "modo_edicion_cat", "categoria_sel"]:
+                    st.session_state.pop(k, None)
                 st.rerun()
+
             except ValueError as e:
                 st.warning(f"⚠️ {e}")
 
