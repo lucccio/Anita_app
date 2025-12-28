@@ -27,12 +27,12 @@ def vista_usuarios():
     dni = st.text_input(
     "DNI",
     value=st.session_state.get("dni", ""),
-    help="Solo números"
+    max_chars=8
     )
     telefono = st.text_input(
         "Teléfono",
         value=st.session_state.get("telefono", ""),
-        help="Solo números"
+        max_chars=9
     )
     email = st.text_input(
         "Email",
@@ -65,7 +65,12 @@ def vista_usuarios():
                 st.success("✏️ Usuario actualizado correctamente")
                 st.session_state.modo_edicion = False
                 st.session_state.usuario_seleccionado = None
-                st.session_state.clear()
+                st.session_state.modo_edicion = False
+                st.session_state.usuario_seleccionado = None
+
+                for k in ["nombre", "apellido", "dni", "telefono", "email"]:
+                    st.session_state.pop(k, None)
+
                 st.rerun()
             except ValueError as e:
                 st.warning(f"⚠️ {e}")
