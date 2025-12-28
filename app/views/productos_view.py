@@ -10,7 +10,26 @@ def vista_productos():
     descripcion = st.text_area("Descripción")
     precio = st.number_input("Precio", min_value=0.0, step=0.1)
     stock = st.number_input("Stock", min_value=0, step=1)
-    categoria_id = st.text_input("ID Categoría")
+    from app.logic.categorias_logic import obtener_categorias
+
+    # Obtener categorías
+    categorias = obtener_categorias().data
+
+    # Validar si hay categorías
+    if not categorias:
+        st.warning("No hay categorías registradas. Registra una primero.")
+        return
+
+    # Crear diccionario: Nombre visible -> ID real
+    opciones = {c["nombre"]: c["id"] for c in categorias}
+
+    categoria_seleccionada = st.selectbox(
+        "Seleccionar Categoría",
+        list(opciones.keys())
+    )
+
+    categoria_id = opciones[categoria_seleccionada]
+
 
     if st.button("Registrar producto"):
         try:
