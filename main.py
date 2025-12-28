@@ -2,6 +2,7 @@ import streamlit as st
 
 from app.views.usuarios_view import vista_usuarios
 from app.views.categorias_view import vista_categorias
+from app.views.productos_view import vista_productos
 
 # ================= CONFIGURACIÓN =================
 st.set_page_config(
@@ -35,7 +36,7 @@ elif opcion == "Categorías":
     
 elif opcion == "Productos":
     st.subheader("📦 Productos")
-    st.info("🚧 Módulo en proceso de desarrollo")
+    vista_productos()
 
 elif opcion == "Ventas":
     st.subheader("💰 Ventas")
