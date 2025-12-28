@@ -1,35 +1,45 @@
 import streamlit as st
+
 from app.views.usuarios_view import vista_usuarios
+from app.views.categorias_view import vista_categorias
 
-st.set_page_config(page_title="Anita New Style", layout="wide")
+# ================= CONFIGURACIÓN =================
+st.set_page_config(
+    page_title="Anita New Style",
+    layout="wide"
+)
 
-# 🔒 SIMULACIÓN DE ROL
-if "rol" not in st.session_state:
-    st.session_state.rol = "admin"  # simulamos admin
+st.title("🛍️ Anita New Style")
 
-st.sidebar.title("Menú")
+# ================= SIDEBAR =================
+st.sidebar.title("Menú principal")
 
-if st.session_state.rol == "admin":
-    opcion = st.sidebar.radio(
-        "Panel Admin",
-        ["Usuarios", "Categorías", "Productos", "Ventas"]
-    )
-else:
-    opcion = st.sidebar.radio(
-        "Menú",
-        ["Catálogo"]
-    )
+opcion = st.sidebar.radio(
+    "Selecciona una opción:",
+    [
+        "Usuarios",
+        "Categorías",
+        "Productos",
+        "Ventas",
+        "Reportes"
+    ]
+)
 
-st.title("Anita New Style")
-
+# ================= CONTENIDO =================
 if opcion == "Usuarios":
     vista_usuarios()
-    
+
 elif opcion == "Categorías":
-    st.info("Módulo categorías")
+    vista_categorias()
 
 elif opcion == "Productos":
-    st.info("Módulo productos")
+    st.subheader("📦 Productos")
+    st.info("🚧 Módulo en proceso de desarrollo")
 
 elif opcion == "Ventas":
-    st.info("Módulo ventas")
+    st.subheader("💰 Ventas")
+    st.info("🚧 Módulo en proceso de desarrollo")
+
+elif opcion == "Reportes":
+    st.subheader("📊 Reportes")
+    st.info("🚧 Módulo en proceso de desarrollo")
