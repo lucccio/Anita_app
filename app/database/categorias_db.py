@@ -6,7 +6,13 @@ def insertar_categoria(categoria: dict):
 
 
 def listar_categorias():
-    return supabase.table("categorias").select("*").execute()
+    return (
+        supabase
+        .table("categorias")
+        .select("id, nombre, descripcion")
+        .order("nombre")
+        .execute()
+    )
 
 
 def actualizar_categoria(categoria_id: int, datos: dict):
