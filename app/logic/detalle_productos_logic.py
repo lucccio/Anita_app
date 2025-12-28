@@ -1,19 +1,11 @@
 from app.database.detalle_productos_db import (
     insertar_detalle_producto,
-    listar_detalles_por_producto
+    listar_detalles,
+    actualizar_detalle
 )
 
-def registrar_detalle_producto(
-    producto_id,
-    color,
-    talla,
-    genero,
-    stock
-):
-    if not producto_id:
-        raise ValueError("Producto inválido")
-
-    if not all([color, talla, genero]):
+def registrar_detalle(producto_id, color, talla, genero, stock):
+    if not all([producto_id, color, talla, genero]):
         raise ValueError("No se permiten campos vacíos")
 
     if stock < 0:
@@ -24,10 +16,23 @@ def registrar_detalle_producto(
         "color": color.strip().lower(),
         "talla": talla,
         "genero": genero,
-        "stock": stock
+        "stock": int(stock)
     }
 
     return insertar_detalle_producto(detalle)
 
-def obtener_detalles_por_producto(producto_id: int):
-    return listar_detalles_por_producto(producto_id)
+def obtener_detalles():
+    return listar_detalles()
+
+def editar_detalle(detalle_id, color, talla, genero, stock):
+    if not detalle_id:
+        raise ValueError("Detalle inválido")
+
+    datos = {
+        "color": color.strip().lower(),
+        "talla": talla,
+        "genero": genero,
+        "stock": int(stock)
+    }
+
+    return actualizar_detalle(detalle_id, datos)
