@@ -1,25 +1,35 @@
 import streamlit as st
-from app.logic.productos_logic import registrar_producto, obtener_productos
+from app.logic.productos_logic import (
+    registrar_producto,
+    obtener_productos
+)
+from app.logic.categorias_logic import obtener_categorias
+
 
 def vista_productos():
     st.subheader("Gestión de Productos")
 
     st.write("Formulario de registro")
 
+    # ========= FORM ==========
     nombre = st.text_input("Nombre del producto")
     descripcion = st.text_area("Descripción")
-    precio = st.number_input("Precio", min_value=0.0, step=0.1)
-    from app.logic.categorias_logic import obtener_categorias
+
+    precio = st.number_input(
+        "Precio",
+        min_value=0.0,
+        step=0.1,
+        format="%.2f"
+    )
 
     # Obtener categorías
     categorias = obtener_categorias().data
 
-    # Validar si hay categorías
     if not categorias:
-        st.warning("No hay categorías registradas. Registra una primero.")
+        st.warning("⚠️ No hay categorías registradas. Registra una primero.")
         return
 
-    # Crear diccionario: Nombre visible -> ID real
+    # Diccionario: nombre visible -> id real
     opciones = {c["nombre"]: c["id"] for c in categorias}
 
     categoria_seleccionada = st.selectbox(
@@ -29,17 +39,27 @@ def vista_productos():
 
     categoria_id = opciones[categoria_seleccionada]
 
-
+    # ========= REGISTRAR ==========
     if st.button("Registrar producto"):
         try:
-            registrar_producto(nombre, descripcion, precio, categoria_id)
-            st.success("Producto registrado correctamente")
+            registrar_producto(
+                nombre.strip(),
+                descripcion.strip(),
+                precio,
+                categoria_id
+            )
+            st.success("✅ Producto registrado correctamente")
             st.rerun()
+
+        except ValueError as e:
+            st.warning(f"⚠️ {e}")
         except Exception as e:
-            st.error(str(e))
+            st.error("❌ Error inesperado")
+            st.write(e)
 
     st.divider()
 
+    # ========= TABLA ==========
     st.subheader("📦 Lista de productos")
 
     productos = obtener_productos().data
@@ -48,6 +68,9 @@ def vista_productos():
         st.info("No hay productos registrados")
         return
 
+    # Crear diccionario id -> nombre categoria
+    map_categorias = {c["id"]: c["nombre"] for c in categorias}
+
     tabla = []
     for p in productos:
         tabla.append({
@@ -55,7 +78,7 @@ def vista_productos():
             "Nombre": p["nombre"],
             "Descripción": p["descripcion"],
             "Precio": p["precio"],
-            "Categoría": p["categoria_id"],
+            "Categoría": map_categorias.get(p["categoria_id"], "Sin categoría")
         })
 
     st.dataframe(tabla, use_container_width=True)
