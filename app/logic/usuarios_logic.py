@@ -82,3 +82,4 @@ def editar_usuario(usuario_id, nombre, apellido, dni, telefono, email):
     }
 
     return actualizar_usuario(usuario_id, datos_actualizados)
+
