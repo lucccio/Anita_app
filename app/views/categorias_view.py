@@ -5,18 +5,20 @@ from app.logic.categorias_logic import (
     editar_categoria
 )
 
-
 def vista_categorias():
     st.subheader("Gestión de Categorías")
 
+    # ================= ESTADOS =================
     if "modo_edicion_cat" not in st.session_state:
         st.session_state.modo_edicion_cat = False
+
+    if "categoria_sel" not in st.session_state:
         st.session_state.categoria_sel = None
 
-    # ===== FORMULARIO =====
+    # ================= FORMULARIO =================
     nombre = st.text_input(
-    "Nombre de la categoría",
-        value=st.session_state.get("cat_nombre", "").lower()
+        "Nombre de la categoría",
+        value=st.session_state.get("cat_nombre", "")
     )
 
     descripcion = st.text_area(
@@ -40,19 +42,19 @@ def vista_categorias():
                     nombre,
                     descripcion
                 )
-                st.success("✏️ Categoría actualizada")
-                st.session_state.modo_edicion_cat = False
-                st.session_state.categoria_sel = None
+                st.success("✏️ Categoría actualizada correctamente")
+
+                # limpiar estados
                 for k in ["cat_nombre", "cat_desc", "modo_edicion_cat", "categoria_sel"]:
                     st.session_state.pop(k, None)
-                st.rerun()
 
+                st.rerun()
             except ValueError as e:
                 st.warning(f"⚠️ {e}")
 
     st.divider()
 
-    # ===== TABLA =====
+    # ================= TABLA =================
     st.subheader("Lista de categorías")
 
     categorias = obtener_categorias().data
@@ -84,10 +86,7 @@ def vista_categorias():
 
     col1, col2 = st.columns([8, 2])
     with col2:
-        if st.button(
-            "✏️ Editar",
-            disabled=not seleccionados
-        ):
+        if st.button("✏️ Editar", disabled=not seleccionados):
             c = seleccionados[0]
             st.session_state.modo_edicion_cat = True
             st.session_state.categoria_sel = c

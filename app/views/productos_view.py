@@ -9,6 +9,7 @@ from app.logic.categorias_logic import obtener_categorias
 def vista_productos():
     st.subheader("Gestión de Productos")
 
+    # ========== FORMULARIO ==========
     st.write("Formulario de registro")
 
     # ========= FORM ==========
@@ -29,22 +30,12 @@ def vista_productos():
         st.warning("⚠️ No hay categorías registradas. Registra una primero.")
         return
 
-    # Diccionario: nombre visible -> id real
     opciones = {c["nombre"]: c["id"] for c in categorias}
 
-    categoria_seleccionada = st.selectbox(
-        "Seleccionar Categoría",
+    categoria_nombre = st.selectbox(
+        "Seleccionar categoría",
         list(opciones.keys())
     )
-
-    categoria_id = opciones[categoria_seleccionada]
-
-    # ========= REGISTRAR ==========
-    if st.button("Registrar producto"):
-        try:
-            registrar_producto(
-                nombre.strip(),
-                descripcion.strip(),
                 precio,
                 categoria_id
             )
@@ -59,16 +50,12 @@ def vista_productos():
 
     st.divider()
 
-    # ========= TABLA ==========
-    st.subheader("📦 Lista de productos")
-
     productos = obtener_productos().data
 
     if not productos:
         st.info("No hay productos registrados")
         return
 
-    # Crear diccionario id -> nombre categoria
     map_categorias = {c["id"]: c["nombre"] for c in categorias}
 
     tabla = []
