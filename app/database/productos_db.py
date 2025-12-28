@@ -1,5 +1,6 @@
 from app.database.conexion import supabase
 
+# INSERTAR
 def insertar_producto(producto: dict):
     return (
         supabase
@@ -8,6 +9,7 @@ def insertar_producto(producto: dict):
         .execute()
     )
 
+# LISTAR
 def listar_productos():
     return (
         supabase
@@ -19,6 +21,7 @@ def listar_productos():
         .execute()
     )
 
+# ACTUALIZAR
 def actualizar_producto(producto_id: int, datos: dict):
     return (
         supabase
