@@ -12,6 +12,7 @@ def vista_productos():
     # ========== FORMULARIO ==========
     st.write("Formulario de registro")
 
+    # ========= FORM ==========
     nombre = st.text_input("Nombre del producto")
     descripcion = st.text_area("Descripción")
 
@@ -29,21 +30,12 @@ def vista_productos():
         st.warning("⚠️ No hay categorías registradas. Registra una primero.")
         return
 
-    # Diccionario: nombre_visible -> id_real
     opciones = {c["nombre"]: c["id"] for c in categorias}
 
     categoria_nombre = st.selectbox(
         "Seleccionar categoría",
         list(opciones.keys())
     )
-
-    categoria_id = opciones[categoria_nombre]
-
-    if st.button("Registrar producto"):
-        try:
-            registrar_producto(
-                nombre,
-                descripcion,
                 precio,
                 categoria_id
             )
@@ -58,16 +50,12 @@ def vista_productos():
 
     st.divider()
 
-    # ========== TABLA ==========
-    st.subheader("📋 Lista de productos")
-
     productos = obtener_productos().data
 
     if not productos:
         st.info("No hay productos registrados")
         return
 
-    # Mapa categoria_id -> nombre
     map_categorias = {c["id"]: c["nombre"] for c in categorias}
 
     tabla = []

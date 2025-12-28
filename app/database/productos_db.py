@@ -1,5 +1,6 @@
 from app.database.conexion import supabase
 
+# INSERTAR PRODUCTO
 def insertar_producto(producto: dict):
     return (
         supabase
@@ -8,22 +9,25 @@ def insertar_producto(producto: dict):
         .execute()
     )
 
+# LISTAR PRODUCTOS
 def listar_productos():
     return (
         supabase
         .table("productos")
-        .select(
-            "id, nombre, descripcion, precio, categoria_id, estado, fecha_creacion"
-        )
-        .order("id")
-        .execute()
-    )
-
-def actualizar_producto(producto_id: int, datos: dict):
     return (
         supabase
         .table("productos")
         .update(datos)
+        .eq("id", producto_id)
+        .execute()
+    )
+
+# ELIMINAR PRODUCTO (por si luego lo necesitas)
+def eliminar_producto(producto_id: str):
+    return (
+        supabase
+        .table("productos")
+        .delete()
         .eq("id", producto_id)
         .execute()
     )
