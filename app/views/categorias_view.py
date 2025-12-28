@@ -1,62 +1,74 @@
 import streamlit as st
 from app.logic.categorias_logic import (
     registrar_categoria,
-    obtener_categorias,
-    editar_categoria
+    editar_categoria,
+    obtener_categorias
 )
 
 def vista_categorias():
     st.subheader("Gestión de Categorías")
 
-    # ================= ESTADOS =================
+    # ========= ESTADOS =========
     if "modo_edicion_cat" not in st.session_state:
         st.session_state.modo_edicion_cat = False
 
-    if "categoria_sel" not in st.session_state:
-        st.session_state.categoria_sel = None
+    if "categoria_seleccionada" not in st.session_state:
+        st.session_state.categoria_seleccionada = None
 
-    # ================= FORMULARIO =================
+    # ========= FORMULARIO =========
     nombre = st.text_input(
-        "Nombre de la categoría",
+        "Nombre",
         value=st.session_state.get("cat_nombre", "")
     )
-
     descripcion = st.text_area(
         "Descripción",
-        value=st.session_state.get("cat_desc", "")
+        value=st.session_state.get("cat_descripcion", "")
     )
 
-    if not st.session_state.modo_edicion_cat:
-        if st.button("Registrar"):
-            try:
-                registrar_categoria(nombre, descripcion)
-                st.success("✅ Categoría registrada correctamente")
-                st.rerun()
-            except ValueError as e:
-                st.warning(f"⚠️ {e}")
-    else:
-        if st.button("Guardar"):
-            try:
-                editar_categoria(
-                    st.session_state.categoria_sel["ID"],
-                    nombre,
-                    descripcion
-                )
-                st.success("✏️ Categoría actualizada correctamente")
+    col_a, col_b = st.columns(2)
 
-                # limpiar estados
-                for k in ["cat_nombre", "cat_desc", "modo_edicion_cat", "categoria_sel"]:
+    # ========= BOTONES =========
+    with col_a:
+        if not st.session_state.modo_edicion_cat:
+            if st.button("Registrar"):
+                try:
+                    registrar_categoria(nombre, descripcion)
+                    st.success("✅ Categoría registrada")
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f"⚠️ {e}")
+        else:
+            if st.button("Guardar cambios"):
+                try:
+                    editar_categoria(
+                        st.session_state.categoria_seleccionada["ID"],
+                        nombre,
+                        descripcion
+                    )
+                    st.success("✏️ Categoría actualizada")
+
+                    # limpiar estados
+                    st.session_state.modo_edicion_cat = False
+                    st.session_state.categoria_seleccionada = None
+                    for k in ["cat_nombre", "cat_descripcion"]:
+                        st.session_state.pop(k, None)
+
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f"⚠️ {e}")
+
+    with col_b:
+        if st.session_state.modo_edicion_cat:
+            if st.button("❌ Cancelar selección"):
+                st.session_state.modo_edicion_cat = False
+                st.session_state.categoria_seleccionada = None
+                for k in ["cat_nombre", "cat_descripcion"]:
                     st.session_state.pop(k, None)
-
                 st.rerun()
-            except ValueError as e:
-                st.warning(f"⚠️ {e}")
 
     st.divider()
 
-    # ================= TABLA =================
-    st.subheader("Lista de categorías")
-
+    # ========= TABLA =========
     categorias = obtener_categorias().data
 
     if not categorias:
@@ -80,16 +92,12 @@ def vista_categorias():
 
     seleccionados = [row for row in edited if row[""]]
 
-    if not seleccionados and st.session_state.modo_edicion_cat:
-        st.session_state.modo_edicion_cat = False
-        st.session_state.categoria_sel = None
-
     col1, col2 = st.columns([8, 2])
     with col2:
         if st.button("✏️ Editar", disabled=not seleccionados):
             c = seleccionados[0]
             st.session_state.modo_edicion_cat = True
-            st.session_state.categoria_sel = c
+            st.session_state.categoria_seleccionada = c
             st.session_state.cat_nombre = c["Nombre"]
-            st.session_state.cat_desc = c["Descripción"]
+            st.session_state.cat_descripcion = c["Descripción"]
             st.rerun()

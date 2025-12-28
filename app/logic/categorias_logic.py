@@ -6,7 +6,7 @@ from app.database.categorias_db import (
 )
 
 def registrar_categoria(nombre, descripcion):
-    nombre = nombre.strip().lower()   
+    nombre = nombre.strip().lower()
     descripcion = descripcion.strip()
 
     if not nombre:
@@ -30,15 +30,15 @@ def editar_categoria(categoria_id, nombre, descripcion):
     if not categoria_id:
         raise ValueError("Categoría inválida")
 
-    nombre = nombre.strip().lower()   
+    nombre = nombre.strip().lower()
     descripcion = descripcion.strip()
 
     if not nombre:
         raise ValueError("El nombre es obligatorio")
 
-    datos_actualizados = {
+    datos = {
         "nombre": nombre,
         "descripcion": descripcion
     }
 
-    return actualizar_categoria(categoria_id, datos_actualizados)
+    return actualizar_categoria(categoria_id, datos)
