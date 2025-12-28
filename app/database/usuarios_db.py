@@ -1,9 +1,7 @@
 from app.database.conexion import supabase
 
-
 def insertar_usuario(usuario: dict):
     return supabase.table("usuarios").insert(usuario).execute()
-
 
 def buscar_usuario_por_email(email: str):
     return (
@@ -14,7 +12,6 @@ def buscar_usuario_por_email(email: str):
         .execute()
     )
 
-
 def actualizar_usuario(usuario_id: int, datos: dict):
     return (
         supabase
@@ -24,7 +21,5 @@ def actualizar_usuario(usuario_id: int, datos: dict):
         .execute()
     )
 
-
 def listar_usuarios():
     return supabase.table("usuarios").select("*").execute()
-
