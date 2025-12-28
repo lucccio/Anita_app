@@ -1,99 +1,130 @@
 import streamlit as st
 from app.logic.productos_logic import (
     registrar_producto,
-    editar_producto,
-    obtener_productos
+    obtener_productos,
+    editar_producto
 )
 from app.logic.categorias_logic import obtener_categorias
 
-def vista_productos():
-    st.subheader("📦 Gestión de Productos")
 
-    # ================= ESTADOS =================
+def cancelar_producto():
+    st.session_state.modo_edicion_producto = False
+    st.session_state.producto_sel = None
+    for k in [
+        "nombre", "descripcion", "precio",
+        "color", "talla", "genero", "stock"
+    ]:
+        st.session_state.pop(k, None)
+
+
+def vista_productos():
+    st.subheader("📦 Productos")
+
+    # ===== ESTADOS =====
     if "modo_edicion_producto" not in st.session_state:
         st.session_state.modo_edicion_producto = False
 
-    if "producto_seleccionado" not in st.session_state:
-        st.session_state.producto_seleccionado = None
+    if "producto_sel" not in st.session_state:
+        st.session_state.producto_sel = None
 
-    # ================= FORM =================
+    # ===== CATEGORIAS =====
+    categorias = obtener_categorias().data
+    if not categorias:
+        st.warning("No hay categorías registradas")
+        return
+
+    cat_map = {c["nombre"]: c["id"] for c in categorias}
+    categoria = st.selectbox("Categoría", list(cat_map.keys()))
+    categoria_id = cat_map[categoria]
+
+    # ===== FORM =====
     nombre = st.text_input(
         "Nombre",
-        value=st.session_state.get("nombre_producto", "")
+        value=st.session_state.get("nombre", "")
     )
 
     descripcion = st.text_area(
         "Descripción",
-        value=st.session_state.get("descripcion_producto", "")
+        value=st.session_state.get("descripcion", "")
     )
 
     precio = st.number_input(
         "Precio",
         min_value=0.0,
         step=0.1,
-        value=st.session_state.get("precio_producto", 0.0)
+        value=st.session_state.get("precio", 0.0)
     )
 
-    categorias = obtener_categorias().data
-    if not categorias:
-        st.warning("⚠️ Registra una categoría primero")
-        return
-
-    opciones = {c["nombre"]: c["id"] for c in categorias}
-
-    categoria_nombre = st.selectbox(
-        "Categoría",
-        opciones.keys(),
-        index=(
-            list(opciones.values()).index(
-                st.session_state.get("categoria_id_producto")
-            ) if st.session_state.get("categoria_id_producto") in opciones.values() else 0
-        )
+    color = st.text_input(
+        "Color",
+        value=st.session_state.get("color", "")
     )
 
-    categoria_id = opciones[categoria_nombre]
+    talla = st.selectbox(
+        "Talla",
+        [
+            '34','35','36','37','38','39','40','41','42','43','44','45',
+            'XS','S','M','L','XL',
+            'pequeña','mediana','grande',
+            'small','medium','large'
+        ]
+    )
 
-    # ================= ACCIONES =================
+    genero = st.selectbox(
+        "Género",
+        ["hombre", "mujer", "unisex"]
+    )
+
+    stock = st.number_input(
+        "Stock",
+        min_value=0,
+        step=1,
+        value=st.session_state.get("stock", 0)
+    )
+
+    # ===== BOTONES FORM =====
     col1, col2 = st.columns(2)
 
-    if not st.session_state.modo_edicion_producto:
-        with col1:
-            if st.button("Registrar"):
-                try:
-                    registrar_producto(
-                        nombre, descripcion, precio, categoria_id
-                    )
-                    st.success("✅ Producto registrado")
-                    st.rerun()
-                except ValueError as e:
-                    st.warning(f"⚠️ {e}")
-    else:
-        with col1:
+    with col1:
+        if not st.session_state.modo_edicion_producto:
+            if st.button("Registrar producto"):
+                registrar_producto(
+                    nombre,
+                    precio,
+                    descripcion,
+                    categoria_id,
+                    color,
+                    talla,
+                    genero,
+                    stock
+                )
+                st.success("✅ Producto registrado")
+                st.rerun()
+        else:
             if st.button("Guardar cambios"):
-                try:
-                    editar_producto(
-                        st.session_state.producto_seleccionado["ID"],
-                        nombre, descripcion, precio, categoria_id
-                    )
-                    st.success("✏️ Producto actualizado")
+                editar_producto(
+                    st.session_state.producto_sel["ID"],
+                    nombre,
+                    precio,
+                    descripcion,
+                    categoria_id
+                )
+                st.success("✏️ Producto actualizado")
+                cancelar_producto()
+                st.rerun()
 
-                    cancelar_edicion_producto()
-                    st.rerun()
-
-                except ValueError as e:
-                    st.warning(f"⚠️ {e}")
-
-        with col2:
+    with col2:
+        if st.session_state.modo_edicion_producto:
             if st.button("❌ Cancelar selección"):
-                cancelar_edicion_producto()
+                cancelar_producto()
                 st.rerun()
 
     st.divider()
 
-    # ================= TABLA =================
+    # ===== TABLA =====
     productos = obtener_productos().data
     if not productos:
-        st.info("No hay productos registrados")
+        st.info("No hay productos")
         return
 
     tabla = []
@@ -102,9 +133,12 @@ def vista_productos():
             "": False,
             "ID": p["id"],
             "Nombre": p["nombre"],
-            "Descripción": p["descripcion"],
-            "Precio": p["precio"],
-            "Categoría": p["categoria_id"]
+            "Categoría": p["categorias"]["nombre"],
+            "Color": p["color"],
+            "Talla": p["talla"],
+            "Género": p["genero"],
+            "Stock": p["stock"],
+            "Precio": p["precio"]
         })
 
     edited = st.data_editor(
@@ -115,32 +149,17 @@ def vista_productos():
 
     seleccionados = [r for r in edited if r[""]]
 
-    # ================= BOTONES =================
-    col1, col2 = st.columns([8, 2])
+    # ===== BOTONES TABLA =====
+    col_editar, col_cancelar = st.columns(2)
 
-    with col2:
+    with col_editar:
         if st.button("✏️ Editar", disabled=not seleccionados):
             p = seleccionados[0]
             st.session_state.modo_edicion_producto = True
-            st.session_state.producto_seleccionado = p
+            st.session_state.producto_sel = p
 
-            st.session_state.nombre_producto = p["Nombre"]
-            st.session_state.descripcion_producto = p["Descripción"]
-            st.session_state.precio_producto = p["Precio"]
-            st.session_state.categoria_id_producto = p["Categoría"]
+            st.session_state.nombre = p["Nombre"]
+            st.session_state.precio = p["Precio"]
+            st.session_state.stock = p["Stock"]
 
             st.rerun()
-
-
-# ================= HELPERS =================
-def cancelar_edicion_producto():
-    st.session_state.modo_edicion_producto = False
-    st.session_state.producto_seleccionado = None
-
-    for k in [
-        "nombre_producto",
-        "descripcion_producto",
-        "precio_producto",
-        "categoria_id_producto"
-    ]:
-        st.session_state.pop(k, None)

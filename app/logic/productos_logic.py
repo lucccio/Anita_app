@@ -4,46 +4,37 @@ from app.database.productos_db import (
     actualizar_producto
 )
 
-def registrar_producto(nombre, descripcion, precio, categoria_id):
-    nombre = nombre.strip()
-    descripcion = descripcion.strip()
 
-    if not nombre:
-        raise ValueError("El nombre es obligatorio")
-
-    if precio <= 0:
-        raise ValueError("El precio debe ser mayor a 0")
-
+def registrar_producto(
+    nombre,
+    precio,
+    descripcion,
+    categoria_id,
+    color,
+    talla,
+    genero,
+    stock
+):
     producto = {
         "nombre": nombre,
+        "precio": precio,
         "descripcion": descripcion,
-        "precio": float(precio),
-        "categoria_id": categoria_id,
+        "categoria_id": int(categoria_id),  # ✅ FORZADO A INT
+        "color": color,
+        "talla": talla,
+        "genero": genero,
+        "stock": int(stock)                 # ✅ FORZADO A INT
     }
 
     return insertar_producto(producto)
 
+
 def obtener_productos():
     return listar_productos()
 
-def editar_producto(producto_id, nombre, descripcion, precio, categoria_id):
+
+def editar_producto(producto_id, datos: dict):
     if not producto_id:
         raise ValueError("Producto inválido")
-
-    nombre = nombre.strip()
-    descripcion = descripcion.strip()
-
-    if not nombre:
-        raise ValueError("El nombre es obligatorio")
-
-    if precio <= 0:
-        raise ValueError("El precio debe ser mayor a 0")
-
-    datos = {
-        "nombre": nombre,
-        "descripcion": descripcion,
-        "precio": float(precio),
-        "categoria_id": categoria_id,
-    }
 
     return actualizar_producto(producto_id, datos)
