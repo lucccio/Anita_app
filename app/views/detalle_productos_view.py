@@ -1,94 +1,81 @@
 import streamlit as st
+from app.logic.productos_logic import obtener_productos
 from app.logic.detalle_productos_logic import (
-    obtener_detalles_producto,
     registrar_detalle_producto,
-    borrar_detalle_producto
+    obtener_detalles_por_producto
 )
 
-# ===============================
-#   VISTA DETALLE DE PRODUCTOS
-# ===============================
-def vista_detalle_productos(producto_id=None):
+def vista_detalle_productos():
+    st.subheader("📦 Detalle de Productos")
 
-    st.title("🧩 Detalle del Producto")
+    productos = obtener_productos().data
 
-    # -----------------------------
-    # VALIDAR PRODUCTO ID
-    # -----------------------------
-    if not producto_id:
-        st.error("❌ No se ha recibido el ID del producto.")
-        st.info("Este módulo debe abrirse desde la vista de productos.")
+    if not productos:
+        st.warning("No hay productos registrados")
         return
 
-    st.success(f"Producto seleccionado ID: {producto_id}")
+    # Diccionario: nombre → id
+    opciones = {
+        f'{p["nombre"]} (ID {p["id"]})': p["id"]
+        for p in productos
+    }
 
-    st.subheader("Registrar variación")
+    producto_seleccionado = st.selectbox(
+        "Selecciona un producto",
+        list(opciones.keys())
+    )
 
-    # -----------------------------
-    # FORMULARIO
-    # -----------------------------
-    with st.form("form_detalle"):
-        color = st.selectbox(
-            "Color",
-            ["negro","blanco","rojo","azul","verde","amarillo",
-             "rosado","marrón","gris","beige","celeste","morado"]
-        )
-
-        talla = st.selectbox(
-            "Talla",
-            [
-                "34","35","36","37","38","39","40","41","42","43","44","45",
-                "XS","S","M","L","XL",
-                "pequeña","mediana","grande",
-                "small","medium","large"
-            ]
-        )
-
-        genero = st.selectbox("Género", ["hombre", "mujer", "unisex"])
-
-        stock = st.number_input("Stock", min_value=0, step=1)
-
-        submitted = st.form_submit_button("Guardar detalle")
-
-        if submitted:
-            try:
-                registrar_detalle_producto(
-                    producto_id,
-                    color,
-                    talla,
-                    genero,
-                    stock
-                )
-                st.success("✔️ Detalle registrado correctamente")
-                st.rerun()
-            except Exception as e:
-                st.error(f"❌ Error: {e}")
+    producto_id = opciones[producto_seleccionado]
 
     st.divider()
+    st.write("### Registrar detalle")
 
-    # -----------------------------
-    # LISTA DE DETALLES
-    # -----------------------------
-    st.subheader("Variaciones registradas")
+    color = st.text_input("Color")
+    talla = st.selectbox(
+        "Talla",
+        [
+            '34','35','36','37','38','39','40','41','42','43','44','45',
+            'XS','S','M','L','XL',
+            'pequeña','mediana','grande',
+            'small','medium','large'
+        ]
+    )
 
-    detalles = obtener_detalles_producto(producto_id).data
+    genero = st.selectbox(
+        "Género",
+        ["hombre", "mujer", "unisex"]
+    )
+
+    stock = st.number_input(
+        "Stock",
+        min_value=0,
+        step=1
+    )
+
+    if st.button("Registrar detalle"):
+        try:
+            registrar_detalle_producto(
+                producto_id,
+                color,
+                talla,
+                genero,
+                stock
+            )
+            st.success("✅ Detalle registrado correctamente")
+            st.rerun()
+        except ValueError as e:
+            st.warning(f"⚠️ {e}")
+        except Exception as e:
+            st.error("❌ Error inesperado")
+            st.write(e)
+
+    st.divider()
+    st.write("### Detalles registrados")
+
+    detalles = obtener_detalles_por_producto(producto_id).data
 
     if not detalles:
-        st.info("ℹ️ Este producto no tiene variaciones registradas todavía.")
+        st.info("Este producto no tiene detalles registrados")
         return
 
-    for d in detalles:
-        with st.container(border=True):
-            st.write(
-                f"🎨 **Color:** {d['color']} | "
-                f"📏 **Talla:** {d['talla']} | "
-                f"🚻 **Género:** {d['genero']} | "
-                f"📦 **Stock:** {d['stock']}"
-            )
-
-            eliminar = st.button("🗑️ Eliminar", key=d["id"])
-
-            if eliminar:
-                borrar_detalle_producto(d["id"])
-                st.success("Variación eliminada correctamente")
-                st.rerun()
+    st.dataframe(detalles, use_container_width=True)

@@ -1,16 +1,5 @@
 from app.database.conexion import supabase
 
-# LISTAR DETALLES POR PRODUCTO
-def listar_detalles_producto(producto_id: str):
-    return (
-        supabase
-        .table("detalle_productos")
-        .select("*")
-        .eq("producto_id", producto_id)
-        .execute()
-    )
-
-# INSERTAR DETALLE
 def insertar_detalle_producto(detalle: dict):
     return (
         supabase
@@ -19,8 +8,26 @@ def insertar_detalle_producto(detalle: dict):
         .execute()
     )
 
-# ACTUALIZAR DETALLE
-def actualizar_detalle_producto(detalle_id: str, datos: dict):
+def listar_detalles():
+    return (
+        supabase
+        .table("detalle_productos")
+        .select("*")
+        .order("id")
+        .execute()
+    )
+
+def listar_detalles_por_producto(producto_id: int):
+    return (
+        supabase
+        .table("detalle_productos")
+        .select("*")
+        .eq("producto_id", producto_id)
+        .order("id")
+        .execute()
+    )
+
+def actualizar_detalle(detalle_id: int, datos: dict):
     return (
         supabase
         .table("detalle_productos")
@@ -29,8 +36,7 @@ def actualizar_detalle_producto(detalle_id: str, datos: dict):
         .execute()
     )
 
-# ELIMINAR DETALLE
-def eliminar_detalle_producto(detalle_id: str):
+def eliminar_detalle(detalle_id: int):
     return (
         supabase
         .table("detalle_productos")
