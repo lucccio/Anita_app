@@ -1,9 +1,12 @@
+from operator import imod
 import streamlit as st
 
 from app.views.usuarios_view import vista_usuarios
 from app.views.categorias_view import vista_categorias
 from app.views.productos_view import vista_productos
+from app.views.reportes_view import vista_reportes
 from app.views.ventas_view import vista_ventas
+
 
 # ================= CONFIGURACIÓN =================
 st.set_page_config(
@@ -45,4 +48,4 @@ elif opcion == "Ventas":
 
 elif opcion == "Reportes":
     st.subheader("📊 Reportes")
-    st.info("🚧 Módulo en proceso de desarrollo")
+    vista_reportes()
