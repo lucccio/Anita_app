@@ -4,6 +4,7 @@ from app.views.usuarios_view import vista_usuarios
 from app.views.categorias_view import vista_categorias
 from app.views.productos_view import vista_productos
 from app.views.detalle_productos_view import vista_detalle_productos
+from app.views.reportes_view import vista_reportes
 
 # ================= CONFIGURACIÓN =================
 st.set_page_config(
@@ -50,4 +51,4 @@ elif opcion == "Ventas":
 
 elif opcion == "Reportes":
     st.subheader("📊 Reportes")
-    st.info("🚧 Módulo en proceso de desarrollo")
+    vista_reportes()
