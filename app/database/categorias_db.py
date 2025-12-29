@@ -1,9 +1,7 @@
 from app.database.conexion import supabase
 
-
 def insertar_categoria(categoria: dict):
     return supabase.table("categorias").insert(categoria).execute()
-
 
 def listar_categorias():
     return (
@@ -14,7 +12,6 @@ def listar_categorias():
         .execute()
     )
 
-
 def actualizar_categoria(categoria_id: int, datos: dict):
     return (
         supabase
@@ -23,7 +20,6 @@ def actualizar_categoria(categoria_id: int, datos: dict):
         .eq("id", categoria_id)
         .execute()
     )
-
 
 def buscar_categoria_por_nombre(nombre: str):
     return (

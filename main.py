@@ -1,10 +1,12 @@
+from operator import imod
 import streamlit as st
 
 from app.views.usuarios_view import vista_usuarios
 from app.views.categorias_view import vista_categorias
 from app.views.productos_view import vista_productos
-from app.views.detalle_productos_view import vista_detalle_productos
 from app.views.reportes_view import vista_reportes
+from app.views.ventas_view import vista_ventas
+
 
 # ================= CONFIGURACIÓN =================
 st.set_page_config(
@@ -23,7 +25,6 @@ opcion = st.sidebar.radio(
         "Usuarios",
         "Categorías",
         "Productos",
-        "Detalles de Productos",
         "Ventas",
         "Reportes"
     ]
@@ -41,13 +42,9 @@ elif opcion == "Productos":
     st.subheader("📦 Productos")
     vista_productos()
 
-elif opcion == "Detalles de Productos":
-    st.subheader("📦 Detalles de Productos")
-    vista_detalle_productos()
-
 elif opcion == "Ventas":
     st.subheader("💰 Ventas")
-    st.info("🚧 Módulo en proceso de desarrollo")
+    vista_ventas()
 
 elif opcion == "Reportes":
     st.subheader("📊 Reportes")

@@ -6,7 +6,7 @@ from app.logic.usuarios_logic import (
 )
 
 def vista_usuarios():
-    st.subheader("Gestión de Usuarios")
+    st.subheader("👤 Gestión de Usuarios")
 
     # ================= ESTADOS =================
     if "modo_edicion" not in st.session_state:
@@ -16,71 +16,54 @@ def vista_usuarios():
         st.session_state.usuario_seleccionado = None
 
     # ================= FORMULARIO =================
-    nombre = st.text_input(
-        "Nombre",
-        value=st.session_state.get("nombre", "")
-    )
-    apellido = st.text_input(
-        "Apellido",
-        value=st.session_state.get("apellido", "")
-    )
-    dni = st.text_input(
-    "DNI",
-    value=st.session_state.get("dni", ""),
-    max_chars=8
-    )
-    telefono = st.text_input(
-        "Teléfono",
-        value=st.session_state.get("telefono", ""),
-        max_chars=9
-    )
-    email = st.text_input(
-        "Email",
-        value=st.session_state.get("email", "")
-    )
-    password = st.text_input(
-        "Password",
-        type="password"
-    )
+    nombre = st.text_input("Nombre", value=st.session_state.get("nombre", ""))
+    apellido = st.text_input("Apellido", value=st.session_state.get("apellido", ""))
+    dni = st.text_input("DNI", value=st.session_state.get("dni", ""), max_chars=8)
+    telefono = st.text_input("Teléfono", value=st.session_state.get("telefono", ""), max_chars=9)
+    email = st.text_input("Email", value=st.session_state.get("email", ""))
+    password = st.text_input("Password", type="password")
 
+    col1, col2 = st.columns(2)
+
+    # ========= REGISTRAR =========
     if not st.session_state.modo_edicion:
-        if st.button("Registrar"):
-            try:
-                registrar_usuario(
-                    nombre, apellido, dni, telefono, email, password
-                )
-                st.success("✅ Usuario registrado correctamente")
-                st.rerun()
-            except ValueError as e:
-                st.warning(f"⚠️ {e}")
-            except Exception:
-                st.error("❌ Ocurrió un error inesperado")
+        with col1:
+            if st.button("➕ Registrar"):
+                try:
+                    registrar_usuario(nombre, apellido, dni, telefono, email, password)
+                    st.success("✅ Usuario registrado correctamente")
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f"⚠️ {e}")
+                except Exception:
+                    st.error("❌ Error inesperado")
+
+    # ========= EDITAR =========
     else:
-        if st.button("Guardar"):
-            try:
-                editar_usuario(
-                    st.session_state.usuario_seleccionado["ID"],
-                    nombre, apellido, dni, telefono, email
-                )
-                st.success("✏️ Usuario actualizado correctamente")
-                st.session_state.modo_edicion = False
-                st.session_state.usuario_seleccionado = None
-                st.session_state.modo_edicion = False
-                st.session_state.usuario_seleccionado = None
+        with col1:
+            if st.button("💾 Guardar cambios"):
+                try:
+                    editar_usuario(
+                        st.session_state.usuario_seleccionado["ID"],
+                        nombre, apellido, dni, telefono, email
+                    )
+                    st.success("✏️ Usuario actualizado correctamente")
+                    limpiar_estado_usuario()
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f"⚠️ {e}")
+                except Exception:
+                    st.error("❌ Error al actualizar")
 
-                for k in ["nombre", "apellido", "dni", "telefono", "email"]:
-                    st.session_state.pop(k, None)
-
+        with col2:
+            if st.button("❌ Cancelar selección"):
+                limpiar_estado_usuario()
                 st.rerun()
-            except ValueError as e:
-                st.warning(f"⚠️ {e}")
-            except Exception:
-                st.error("❌ Error al actualizar el usuario")
 
     st.divider()
 
     # ================= TABLA =================
-    st.subheader("Lista de usuarios")
+    st.subheader("📋 Lista de usuarios")
 
     usuarios = obtener_usuarios().data
 
@@ -91,7 +74,7 @@ def vista_usuarios():
     tabla = []
     for u in usuarios:
         tabla.append({
-            "": False,
+            "Seleccionar": False,
             "ID": u["id"],
             "Nombre": u["nombre"],
             "Apellido": u["apellido"],
@@ -106,23 +89,11 @@ def vista_usuarios():
         use_container_width=True
     )
 
-    seleccionados = [row for row in edited if row[""]]
-    # Si no hay selección, cancelar edición
-    if not seleccionados and st.session_state.modo_edicion:
-        st.session_state.modo_edicion = False
-        st.session_state.usuario_seleccionado = None
-        st.session_state.pop("nombre", None)
-        st.session_state.pop("apellido", None)
-        st.session_state.pop("dni", None)
-        st.session_state.pop("telefono", None)
-        st.session_state.pop("email", None)
+    seleccionados = [row for row in edited if row["Seleccionar"]]
 
-    col1, col2 = st.columns([8, 2])
-    with col2:
-        if st.button(
-            "✏️ Editar",
-            disabled=not seleccionados
-        ):
+    col_a, col_b = st.columns([8, 2])
+    with col_b:
+        if st.button("✏️ Editar", disabled=not seleccionados):
             u = seleccionados[0]
             st.session_state.modo_edicion = True
             st.session_state.usuario_seleccionado = u
@@ -135,3 +106,11 @@ def vista_usuarios():
 
             st.rerun()
 
+
+# ================= UTIL =================
+def limpiar_estado_usuario():
+    st.session_state.modo_edicion = False
+    st.session_state.usuario_seleccionado = None
+
+    for k in ["nombre", "apellido", "dni", "telefono", "email"]:
+        st.session_state.pop(k, None)
