@@ -35,17 +35,13 @@ if opcion == "Usuarios":
     vista_usuarios()
 
 elif opcion == "Categorías":
-    st.subheader("Categorías")
     vista_categorias()
     
 elif opcion == "Productos":
-    st.subheader("📦 Productos")
     vista_productos()
 
 elif opcion == "Ventas":
-    st.subheader("💰 Ventas")
     vista_ventas()
 
 elif opcion == "Reportes":
-    st.subheader("📊 Reportes")
     vista_reportes()
