@@ -6,7 +6,7 @@ from app.logic.categorias_logic import (
 )
 
 def vista_categorias():
-    st.subheader("Gestión de Categorías")
+    st.subheader("📚 Gestión de Categorías")
 
     # ========= ESTADOS =========
     if "modo_edicion_cat" not in st.session_state:

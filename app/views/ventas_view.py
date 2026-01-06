@@ -28,7 +28,7 @@ def cancelar_venta():
 # VISTA VENTAS
 # =========================
 def vista_ventas():
-    st.subheader("🧾 Ventas")
+    st.subheader("💸 Ventas")
 
     # ===== ESTADOS =====
     if "modo_edicion_venta" not in st.session_state:
