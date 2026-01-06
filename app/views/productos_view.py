@@ -104,10 +104,16 @@ def vista_productos():
             if st.button("Guardar cambios"):
                 editar_producto(
                     st.session_state.producto_sel["ID"],
-                    nombre,
-                    precio,
-                    descripcion,
-                    categoria_id
+                    {
+                        "nombre": nombre,
+                        "precio": precio,
+                        "descripcion": descripcion,
+                        "categoria_id": categoria_id,
+                        "color": color,
+                        "talla": talla,
+                        "genero": genero,
+                        "stock": stock
+                    }
                 )
                 st.success("✏️ Producto actualizado")
                 cancelar_producto()
