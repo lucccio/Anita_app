@@ -1,9 +1,18 @@
 import streamlit as st
+import re
 from app.logic.categorias_logic import (
     registrar_categoria,
     editar_categoria,
     obtener_categorias
 )
+
+# ================= VALIDADORES FRONTEND =================
+def solo_letras(texto):
+    return bool(re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]*", texto))
+
+def descripcion_valida(texto):
+    return bool(re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ0-9 ,.\-\n]*", texto))
+
 
 def vista_categorias():
     st.subheader("📚 Gestión de Categorías")
@@ -18,52 +27,58 @@ def vista_categorias():
     # ========= FORMULARIO =========
     nombre = st.text_input(
         "Nombre",
-        value=st.session_state.get("cat_nombre", "")
+        value=st.session_state.get("cat_nombre", ""),
+        help="Solo letras (obligatorio)"
     )
+
+    if nombre and not solo_letras(nombre):
+        st.error("❌ El nombre solo puede contener letras")
+        return
+
     descripcion = st.text_area(
         "Descripción",
-        value=st.session_state.get("cat_descripcion", "")
+        value=st.session_state.get("cat_descripcion", ""),
+        help="Texto libre (sin símbolos extraños)"
     )
+
+    if descripcion and not descripcion_valida(descripcion):
+        st.error("❌ La descripción contiene caracteres no permitidos")
+        return
 
     col_a, col_b = st.columns(2)
 
     # ========= BOTONES =========
     with col_a:
         if not st.session_state.modo_edicion_cat:
-            if st.button("Registrar"):
+            if st.button("➕ Registrar"):
                 try:
                     registrar_categoria(nombre, descripcion)
-                    st.success("✅ Categoría registrada")
+                    st.success("✅ Categoría registrada correctamente")
                     st.rerun()
                 except ValueError as e:
                     st.warning(f"⚠️ {e}")
+                except Exception:
+                    st.error("❌ Error inesperado")
         else:
-            if st.button("Guardar cambios"):
+            if st.button("💾 Guardar cambios"):
                 try:
                     editar_categoria(
                         st.session_state.categoria_seleccionada["ID"],
                         nombre,
                         descripcion
                     )
-                    st.success("✏️ Categoría actualizada")
-
-                    # limpiar estados
-                    st.session_state.modo_edicion_cat = False
-                    st.session_state.categoria_seleccionada = None
-                    for k in ["cat_nombre", "cat_descripcion"]:
-                        st.session_state.pop(k, None)
-
+                    st.success("✏️ Categoría actualizada correctamente")
+                    limpiar_estado_categoria()
                     st.rerun()
                 except ValueError as e:
                     st.warning(f"⚠️ {e}")
+                except Exception:
+                    st.error("❌ Error al actualizar")
 
     with col_b:
         if st.session_state.modo_edicion_cat:
             if st.button("❌ Cancelar selección"):
-                st.session_state.modo_edicion_cat = False
-                st.session_state.categoria_seleccionada = None
-                for k in ["cat_nombre", "cat_descripcion"]:
-                    st.session_state.pop(k, None)
+                limpiar_estado_categoria()
                 st.rerun()
 
     st.divider()
@@ -78,7 +93,7 @@ def vista_categorias():
     tabla = []
     for c in categorias:
         tabla.append({
-            "": False,
+            "Seleccionar": False,
             "ID": c["id"],
             "Nombre": c["nombre"],
             "Descripción": c["descripcion"]
@@ -90,7 +105,7 @@ def vista_categorias():
         use_container_width=True
     )
 
-    seleccionados = [row for row in edited if row[""]]
+    seleccionados = [row for row in edited if row["Seleccionar"]]
 
     col1, col2 = st.columns([8, 2])
     with col2:
@@ -101,3 +116,11 @@ def vista_categorias():
             st.session_state.cat_nombre = c["Nombre"]
             st.session_state.cat_descripcion = c["Descripción"]
             st.rerun()
+
+
+# ================= UTIL =================
+def limpiar_estado_categoria():
+    st.session_state.modo_edicion_cat = False
+    st.session_state.categoria_seleccionada = None
+    for k in ["cat_nombre", "cat_descripcion"]:
+        st.session_state.pop(k, None)
