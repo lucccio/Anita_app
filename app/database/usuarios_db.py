@@ -61,7 +61,7 @@ def actualizar_usuario(usuario_id: int, datos: dict):
         .execute()
     )
 
-# ========== ELIMINAR (opcional) ==========
+# ========== ELIMINAR ==========
 def eliminar_usuario(usuario_id: int):
     return (
         supabase
