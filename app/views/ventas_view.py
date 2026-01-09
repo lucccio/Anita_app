@@ -28,7 +28,7 @@ def cancelar_venta():
 # VISTA VENTAS
 # =========================
 def vista_ventas():
-    st.subheader("💸 Ventas")
+    st.subheader("💸 Gestión de Ventas")
 
     # ===== ESTADOS =====
     if "modo_edicion_venta" not in st.session_state:
@@ -40,7 +40,7 @@ def vista_ventas():
     # ===== USUARIOS =====
     usuarios = obtener_usuarios().data
     if not usuarios:
-        st.warning("No hay usuarios registrados")
+        st.warning("⚠️ No hay usuarios registrados")
         return
 
     user_map = {
@@ -67,7 +67,7 @@ def vista_ventas():
     # ===== PRODUCTOS =====
     productos = obtener_productos().data
     if not productos:
-        st.warning("No hay productos registrados")
+        st.warning("⚠️ No hay productos registrados")
         return
 
     prod_map = {
@@ -92,52 +92,71 @@ def vista_ventas():
 
     producto_data = prod_map[producto]
     producto_id = producto_data["id"]
-    precio_base = producto_data["precio"]
+    precio_base = float(producto_data["precio"])
 
     # ===== FORMULARIO =====
     cantidad = st.number_input(
         "Cantidad",
         min_value=1,
         step=1,
-        value=st.session_state.get("cantidad", 1)
+        value=int(st.session_state.get("cantidad", 1))
     )
 
     precio_unitario = st.number_input(
-        "Precio unitario",
-        min_value=0.0,
+        "Precio unitario (S/)",
+        min_value=0.01,
         step=0.1,
-        value=st.session_state.get("precio_unitario", precio_base)
+        value=float(st.session_state.get("precio_unitario", precio_base))
     )
 
+    # ===== VALIDACIONES VISUALES =====
+    if cantidad <= 0:
+        st.error("❌ La cantidad debe ser mayor a cero")
+        return
+
+    if precio_unitario <= 0:
+        st.error("❌ El precio unitario debe ser mayor a cero")
+        return
+
     total = cantidad * precio_unitario
-    st.info(f"💰 Total: S/ {total:.2f}")
+    st.info(f"💰 Total de la venta: **S/ {total:.2f}**")
 
     # ===== BOTONES =====
     col1, col2 = st.columns(2)
 
     with col1:
         if not st.session_state.modo_edicion_venta:
-            if st.button("Registrar venta"):
-                registrar_venta(
-                    usuario_id,
-                    producto_id,
-                    cantidad,
-                    precio_unitario
-                )
-                st.success("✅ Venta registrada")
-                st.rerun()
+            if st.button("➕ Registrar venta"):
+                try:
+                    registrar_venta(
+                        usuario_id,
+                        producto_id,
+                        cantidad,
+                        precio_unitario
+                    )
+                    st.success("✅ Venta registrada correctamente")
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f"⚠️ {e}")
+                except Exception:
+                    st.error("❌ Error inesperado al registrar la venta")
         else:
-            if st.button("Guardar cambios"):
-                editar_venta(
-                    st.session_state.venta_sel["ID"],
-                    usuario_id,
-                    producto_id,
-                    cantidad,
-                    precio_unitario
-                )
-                st.success("✏️ Venta actualizada")
-                cancelar_venta()
-                st.rerun()
+            if st.button("💾 Guardar cambios"):
+                try:
+                    editar_venta(
+                        st.session_state.venta_sel["ID"],
+                        usuario_id,
+                        producto_id,
+                        cantidad,
+                        precio_unitario
+                    )
+                    st.success("✏️ Venta actualizada correctamente")
+                    cancelar_venta()
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f"⚠️ {e}")
+                except Exception:
+                    st.error("❌ Error al actualizar la venta")
 
     with col2:
         if st.session_state.modo_edicion_venta:
@@ -156,7 +175,7 @@ def vista_ventas():
     tabla = []
     for v in ventas:
         tabla.append({
-            "": False,
+            "Seleccionar": False,
             "ID": v["id"],
             "Usuario": f'{v["usuarios"]["nombre"]} {v["usuarios"]["apellido"]}',
             "Producto": v["productos"]["nombre"],
@@ -172,7 +191,7 @@ def vista_ventas():
         use_container_width=True
     )
 
-    seleccionados = [r for r in edited if r[""]]
+    seleccionados = [r for r in edited if r["Seleccionar"]]
 
     if st.button("✏️ Editar", disabled=not seleccionados):
         v = seleccionados[0]
