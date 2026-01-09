@@ -5,10 +5,30 @@ from app.database.usuarios_db import (
     actualizar_usuario
 )
 import hashlib
+import re
 
 
+# ================= VALIDADORES =================
+def validar_texto(campo, nombre_campo):
+    if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]+", campo):
+        raise ValueError(f"{nombre_campo} solo debe contener letras")
+
+
+def validar_email(email):
+    patron = r"^[\w\.-]+@gmail\.com$"
+    if not re.match(patron, email):
+        raise ValueError("Correo inválido (solo @gmail.com)")
+
+
+def validar_password(password):
+    if len(password) < 8:
+        raise ValueError("La contraseña debe tener mínimo 8 caracteres")
+    if not any(c.isdigit() for c in password):
+        raise ValueError("La contraseña debe contener al menos un número")
+
+
+# ================= REGISTRAR =================
 def registrar_usuario(nombre, apellido, dni, telefono, email, password):
-    # limpiar espacios
     nombre = nombre.strip()
     apellido = apellido.strip()
     dni = dni.strip()
@@ -16,9 +36,11 @@ def registrar_usuario(nombre, apellido, dni, telefono, email, password):
     email = email.strip()
     password = password.strip()
 
-    # validaciones
     if not all([nombre, apellido, dni, telefono, email, password]):
         raise ValueError("No se permiten campos vacíos")
+
+    validar_texto(nombre, "Nombre")
+    validar_texto(apellido, "Apellido")
 
     if not dni.isdigit() or len(dni) != 8:
         raise ValueError("El DNI debe tener exactamente 8 dígitos")
@@ -26,11 +48,10 @@ def registrar_usuario(nombre, apellido, dni, telefono, email, password):
     if not telefono.isdigit() or len(telefono) != 9:
         raise ValueError("El teléfono debe tener exactamente 9 dígitos")
 
-    if not email.endswith("@gmail.com"):
-        raise ValueError("Solo se permiten correos @gmail.com")
+    validar_email(email)
+    validar_password(password)
 
-    existe = buscar_usuario_por_email(email)
-    if existe.data:
+    if buscar_usuario_por_email(email).data:
         raise ValueError("El correo ya está registrado")
 
     password_hash = hashlib.sha256(password.encode()).hexdigest()
@@ -47,10 +68,12 @@ def registrar_usuario(nombre, apellido, dni, telefono, email, password):
     return insertar_usuario(usuario)
 
 
+# ================= LISTAR =================
 def obtener_usuarios():
     return listar_usuarios()
 
 
+# ================= EDITAR =================
 def editar_usuario(usuario_id, nombre, apellido, dni, telefono, email):
     if not usuario_id:
         raise ValueError("Usuario inválido")
@@ -64,14 +87,16 @@ def editar_usuario(usuario_id, nombre, apellido, dni, telefono, email):
     if not all([nombre, apellido, dni, telefono, email]):
         raise ValueError("No se permiten campos vacíos")
 
+    validar_texto(nombre, "Nombre")
+    validar_texto(apellido, "Apellido")
+
     if not dni.isdigit() or len(dni) != 8:
         raise ValueError("El DNI debe tener exactamente 8 dígitos")
 
     if not telefono.isdigit() or len(telefono) != 9:
         raise ValueError("El teléfono debe tener exactamente 9 dígitos")
 
-    if not email.endswith("@gmail.com"):
-        raise ValueError("Solo se permiten correos @gmail.com")
+    validar_email(email)
 
     datos_actualizados = {
         "nombre": nombre,
@@ -82,4 +107,3 @@ def editar_usuario(usuario_id, nombre, apellido, dni, telefono, email):
     }
 
     return actualizar_usuario(usuario_id, datos_actualizados)
-

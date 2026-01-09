@@ -1,9 +1,17 @@
 import streamlit as st
+import re
 from app.logic.usuarios_logic import (
     registrar_usuario,
     editar_usuario,
     obtener_usuarios
 )
+
+# ================= VALIDADORES FRONTEND =================
+def solo_letras(texto):
+    return bool(re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñ ]*", texto))
+
+def solo_numeros(texto):
+    return texto.isdigit() or texto == ""
 
 def vista_usuarios():
     st.subheader("👤 Gestión de Usuarios")
@@ -16,12 +24,55 @@ def vista_usuarios():
         st.session_state.usuario_seleccionado = None
 
     # ================= FORMULARIO =================
-    nombre = st.text_input("Nombre", value=st.session_state.get("nombre", ""))
-    apellido = st.text_input("Apellido", value=st.session_state.get("apellido", ""))
-    dni = st.text_input("DNI", value=st.session_state.get("dni", ""), max_chars=8)
-    telefono = st.text_input("Teléfono", value=st.session_state.get("telefono", ""), max_chars=9)
-    email = st.text_input("Email", value=st.session_state.get("email", ""))
-    password = st.text_input("Password", type="password")
+    nombre = st.text_input(
+        "Nombre",
+        value=st.session_state.get("nombre", ""),
+        help="Solo letras"
+    )
+    if not solo_letras(nombre):
+        st.error("❌ El nombre solo puede contener letras")
+        return
+
+    apellido = st.text_input(
+        "Apellido",
+        value=st.session_state.get("apellido", ""),
+        help="Solo letras"
+    )
+    if not solo_letras(apellido):
+        st.error("❌ El apellido solo puede contener letras")
+        return
+
+    dni = st.text_input(
+        "DNI",
+        value=st.session_state.get("dni", ""),
+        max_chars=8,
+        help="Solo números (8 dígitos)"
+    )
+    if not solo_numeros(dni):
+        st.error("❌ El DNI solo puede contener números")
+        return
+
+    telefono = st.text_input(
+        "Teléfono",
+        value=st.session_state.get("telefono", ""),
+        max_chars=9,
+        help="Solo números (9 dígitos)"
+    )
+    if not solo_numeros(telefono):
+        st.error("❌ El teléfono solo puede contener números")
+        return
+
+    email = st.text_input(
+        "Email",
+        value=st.session_state.get("email", ""),
+        help="Solo correos @gmail.com"
+    )
+
+    password = st.text_input(
+        "Password",
+        type="password",
+        help="Mínimo 8 caracteres y al menos un número"
+    )
 
     col1, col2 = st.columns(2)
 
